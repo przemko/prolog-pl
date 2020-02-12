@@ -2,7 +2,7 @@
 :- use_module(solver).
 :- use_module(gui).
 
-% solve(+Nazwa_Przykładua), na przykład solve(t3)
+% solve(+Nazwa_Przykładu), na przykład solve(t3)
 solve(ID) :-
     tiles(ID, Tiles),
     time(solve(Tiles, Board)),
