@@ -19,11 +19,11 @@ unify(A1, A2) :-
 
 unify2(D, D) :- !.
 unify2(D1, D2) :-
-	store(D1, S1),
-	store(D2, S2),
-	S1 =.. [T1, V1],
-	S2 =.. [T2, V2],
-	unify3(D1, T1, V1, D2, T2, V2).
+	store(D1, S1),  % S1 = ref(A1) lub S1 = str(A1)
+	store(D2, S2),  % S2 = ref(A2) lub S2 = str(A2)
+	S1 =.. [T1, A1],
+	S2 =.. [T2, A2],
+	unify3(D1, T1, A1, D2, T2, A2).
 
 unify3(D1, ref, _, D2, _, _) :- !,
 	bind(D1, D2).
