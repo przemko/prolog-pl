@@ -34,7 +34,7 @@ program(
 % read N;
 % D := 0;
 % R := M;
-% while R > N do
+% while R >= N do
 %   D := D + 1;
 %   R := R - N;
 % od;
@@ -47,7 +47,7 @@ program(
 % 3
 % 27
 %  X = [read('M'), read('N'), assign('D', int(0)), assign('R', id('M')),
-% while(id('R')>id('N'), [assign('D', id(...)+int(...)), assign('R', ...
+% while(id('R')>=id('N'), [assign('D', id(...)+int(...)), assign('R', ...
 % - ...)]), write(id('D')), write(id('R'))].
 %
 % ?- X is 3*32+27.
@@ -60,7 +60,7 @@ program(
 	read('N'),
 	assign('D', int(0)),
 	assign('R', id('M')),
-	while(id('R') > id('N'),
+	while(id('R') >= id('N'),
 	      [
 		  assign('D', id('D') + int(1)),
 		  assign('R', id('R') - id('N'))]),
