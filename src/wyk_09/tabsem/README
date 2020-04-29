@@ -1,0 +1,173 @@
+1 Praca w trybie graficznym
+
+1.1 Uruchomienie programu
+
+$ swipl
+Welcome to SWI-Prolog (Multi-threaded, 64 bits, Version 6.3.4)
+Copyright (c) 1990-2012 University of Amsterdam, VU Amsterdam
+SWI-Prolog comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to redistribute it under certain conditions.
+Please visit http://www.swi-prolog.org for details.
+
+For help, use ?- help(Topic). or ?- apropos(Word).
+
+?- [main].
+
+1.2 Korzystanie z programu
+
+- w polu Formula wpisz domkniętą formułę rachunku predykatu zgodnie z poniższą gramatyką:
+
+    FORMULA = or(FORMULA, FORMULA)      alternatywa
+    FORMULA = and(FORMULA, FORMULA)     koniunkcja
+    FORMULA = imp(FORMULA, FORMULA)     implikacja
+    FORMULA = equ(FORMULA, FORMULA)     równoważność
+    FORMULA = all(ZMIENNA, FORMULA)     kwantyfikator ogólny
+    FORMULA = ex(ZMIENNA, FORMULA)      kwantyfikator szczegółowy
+    FORMULA = ATOM                      zmienna zdaniowa (stała prologowa)
+    FORMULA = ATOM(TERM, ..., TERM)     formuła atomowa
+    TERM    = ZMIENNA                   zmienna indywiduowa
+    TERM    = ATOM                      stała
+
+- z menu Examples możesz wybrać formułę spośród przygotowanych przykładów
+
+- aby udowodnić formułę przez budowę tabeli semantycznej dla jej negacji kliknij przycisk Prove
+
+- aby znaleźć model dla formuły przez budowę tabeli semantycznej kliknij przycisk Model
+
+- poniżej rysowanego drzewa znajduje się wiersz ze statusem, w którym drukowane są następujące komunikaty:
+
+  = Formula is true. All branches are closed (red).
+    gdy formuła jest prawdziwa
+
+  = Formula is not true. There is an open leaf (green) for its negation.
+    gdy formuła nie jest prawdziwa
+
+  = Some branches were pruned (yellow leaves). Increase limit and try again.
+    kiedy nie udało się rozstrzygnąć prawdziwości formuły i potrzeba zwiększyć limit
+
+  = Formula is false and has no model. All branches are closed (red).
+    kiedy formuła jest fałszywa i nie ma modelu
+
+  = Formula is not false. There is an open leaf (green) with a model.
+    kiedy formuła nie jest fałszywa i ma model
+
+- jeśli, któraś z gałęzi w budowanej tabeli została obcięta, to zwiększ limit głębokości suwakiem Limit lub klikając na przycisku +1, a następnie znowu kliknij przycisk Prove albo Model
+
+- po zbudowaniu tabeli semantycznej możesz zapisać ją w formacie EPS klikając przycisk Postscript i wpisując nazwę dla tworzonego pliku
+
+- informacje o autorze i wersji programu otrzymasz klikając na przycisku About
+
+- kliknięcie na przycisku Quit kończy pracę aplikacji
+
+Uwaga: w przypadku dowodzenie formuły, która nie jest prawdziwa oraz przy poszukiwaniu modelu dla formuły, która jest spełnialna zastosowana metoda nie gwarantuje powodzenia
+ 
+2 Praca z modułem tabsem
+
+2.1 Załadowanie modułu
+
+Aby skorzystać z modułu tabsem należy zadać pytanie:
+
+?- use_module(tabsem).
+
+Jeśli chce się wykorzystywać moduł tabsem we własnym programie, należy na początku pliku źródłowego wpisać następującą dyrektywę:
+
+:- use_module(tabsem).
+
+2.2 Korzystanie z eksportowanych predykatów
+
+2.2.1 Dowodzenie prawdziwości formuły
+
+Aby sprawdzić czy formuła F jest prawdziwa można skorzystać z predykatu:
+
+    prove(F, Odpowiedz, Tabela)
+
+gdzie Odpowiedz jest zmienna pod którą zostanie podstawiona odpowiedź a Tabela jest zmienną pod którą zostanie podstawiona Tabela.
+
+Odpowiedz może być termem jednej z następujących postaci:
+
+- true       gdy formuła F jest prawdziwa,
+- not(true)  gdy formuła F nie jest prawdziwa
+ 
+Tabela jest termem zgodnym z następującą gramatyką:
+
+    TABELA = closed(ListaFormuł)
+    TABELA = open(ListaFormuł, ListaStałych)
+    TABELA = tree(ListaFormuł, alpha(Formuła), TABELA)
+    TABELA = tree(ListaFormuł, beta(Formuła), TABELA, TABELA)
+    TABELA = tree(ListaFormuł, beta(Formuła), TABELA)
+    TABELA = tree(ListaFormuł, gamma(ListaFormuł, ListaStałych), TABELA)
+
+Jeśli formuła F nie jest prawdziwa, to zastosowana metoda może nie prowadzić do powodzenia, tzn. mogą w konstruowanej tabeli istnieć nieskończone gałęzie, co kończy się wyczerpaniem pamięci i przerwaniem działania predykatu prove/3.
+
+Z powyższego powodu bezpieczniej jest wywołać predykat:
+
+    prove(Limit, F, Odpowiedz, Tabela)
+
+z dodatkowym parametrem Limit będącym liczbą ograniczającą stosowanie reguły gamma.
+
+Dzięki temu dodatkowemu parametrowi, konstruowana tabela nigdy nie ma nieskończonych gałęzi jednak możliwa jest wtedy sytuacja, że pewne gałęzie będą przycięte i nie jest znana dalsza ich postać:
+
+    TABELA = unknown(ListaFormuł)
+    TABELA = closed(ListaFormuł)
+    TABELA = open(ListaFormuł, ListaStałych)
+    TABELA = tree(ListaFormuł, alpha(Formuła), TABELA)
+    TABELA = tree(ListaFormuł, beta(Formuła), TABELA, TABELA)
+    TABELA = tree(ListaFormuł, beta(Formuła), TABELA)
+    TABELA = tree(ListaFormuł, gamma(ListaFormuł, ListaStałych), TABELA)
+
+Jeśli w tak przyciętej tabeli pewna gałąź kończy się otwartym liściem, to zwracana jest odpowiedź not(true), natomiast jeśli pewne gałęzie są przycięte a wszystkie pozostałe są domknięte, to zwracana jest odpowiedź unknown i należy wywołać jeszcze raz predykat prove/4 ale z większą wartością Limitu (np. większą o jeden).
+
+Jeśli natomiast wszystkie gałęzie są domknięte, to zwracana jest odpowiedź true, co oznacza, że formuła F jest prawdziwa.
+
+2.2.2 Konstrukcja modelu dla formuły
+
+Aby sprawdzić czy formuła F jest spełnialna i posiada model, należy wywołać predykat:
+
+    model(F, Odpowiedz, Tabela, Model)
+
+gdzie Odpowiedz jest zmienna pod którą zostanie podstawiona odpowiedź, Tabela jest zmienną pod którą zostanie podstawiona Tabela a Model jest zmienną pod którą zostanie podstawiony model.
+
+Odpowiedz może być termem jednej z następujących postaci:
+
+- false      gdy formuła F jest fałszywa i nie ma modelu,
+- not(false) gdy formuła F nie jest fałszywa i ma model.
+ 
+Tabela jest termem zgodnym z następującą gramatyką:
+
+    TABELA = closed(ListaFormuł)
+    TABELA = open(ListaFormuł, ListaStałych)
+    TABELA = tree(ListaFormuł, alpha(Formuła), TABELA)
+    TABELA = tree(ListaFormuł, beta(Formuła), TABELA, TABELA)
+    TABELA = tree(ListaFormuł, beta(Formuła), TABELA)
+    TABELA = tree(ListaFormuł, gamma(ListaFormuł, ListaStałych), TABELA)
+
+Jeśli odpowiedzią jest not(false) wówczas pod zmienną Model zostanie podstawiony term postaci:
+
+    model(ListaStałych, ListaPozytywnychLiterałów)
+
+
+Jeśli formuła F nie jest fałszywa, to zastosowana metoda może nie prowadzić do powodzenia, tzn. mogą w konstruowanej tabeli istnieć nieskończone gałęzie, co kończy się wyczerpaniem pamięci i przerwaniem działania predykatu model/4.
+
+Z powyższego powodu bezpieczniej jest wywołać predykat:
+
+    model(Limit, F, Odpowiedz, Tabela, Model)
+
+z dodatkowym parametrem Limit będącym liczbą ograniczającą stosowanie reguły gamma.
+
+Dzięki temu dodatkowemu parametrowi, konstruowana tabela nigdy nie ma nieskończonych gałęzi jednak możliwa jest wtedy sytuacja, że pewne gałęzie będą przycięte i nie jest znana dalsza ich postać:
+
+    TABELA = unknown(ListaFormuł)
+    TABELA = closed(ListaFormuł)
+    TABELA = open(ListaFormuł, ListaStałych)
+    TABELA = tree(ListaFormuł, alpha(Formuła), TABELA)
+    TABELA = tree(ListaFormuł, beta(Formuła), TABELA, TABELA)
+    TABELA = tree(ListaFormuł, beta(Formuła), TABELA)
+    TABELA = tree(ListaFormuł, gamma(ListaFormuł, ListaStałych), TABELA)
+
+Jeśli w tak przyciętej tabeli pewna gałąź kończy się otwartym liściem, to zwracana jest odpowiedź not(false) i oddawany jest znaleziony model, natomiast jeśli pewne gałęzie są przycięte a wszystkie pozostałe są domknięte, to zwracana jest odpowiedź unknown i należy wywołać jeszcze raz predykat model/5 ale z większą wartością Limitu (np. większą o jeden).
+
+Jeśli natomiast wszystkie gałęzie są domknięte, to zwracana jest odpowiedź false, co oznacza, że formuła F jest fałszywa i nie ma modelu (pod zmienną Model podstawiana jest lista pusta []).
+
+3. Licencja
+
+Moduł tabsem (prologowy odpowiednik biblioteki) rozpowszechniany jest na zasadach GNU Lesser General Public License (przeczytaj plik LICENSE zawierający treść licencji).
