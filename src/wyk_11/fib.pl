@@ -2,6 +2,7 @@
 
 fib(0).
 fib(1).
+fib(1).
 fib(F) :-
     fib(1, 1, F).
 
