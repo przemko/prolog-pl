@@ -1,0 +1,11 @@
+pre n >= 0;
+
+sum := 0;
+i := 0;
+while i < n loop
+  sum := sum + i;
+  i := i + 1;
+end loop;
+
+post sum = (n*(n+1)) div 2;
+
